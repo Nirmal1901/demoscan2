@@ -81,6 +81,8 @@ def require_role(role):
 
 
 def _is_local(target: str) -> bool:
+    if not target.startswith("/") or target.startswith("//") or "\\" in target:
+        return False
     parts = urlparse(target)
     return not parts.netloc and not parts.scheme
 
