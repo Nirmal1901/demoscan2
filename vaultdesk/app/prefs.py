@@ -1,8 +1,8 @@
 import base64
 import hashlib
 import hmac
+import json
 import os
-import pickle
 
 from flask import Blueprint, jsonify, request
 
@@ -20,7 +20,7 @@ def _sig(blob: bytes) -> str:
 @bp.post("/api/prefs/export")
 @require_auth
 def export_prefs():
-    blob = pickle.dumps(request.get_json() or {})
+    blob = json.dumps(request.get_json() or {}).encode()
     return jsonify(data=base64.b64encode(blob).decode(), sig=_sig(blob))
 
 
@@ -34,5 +34,5 @@ def import_prefs():
         return jsonify(error="bad data"), 400
     if not hmac.compare_digest(_sig(blob), payload.get("sig", "")):
         return jsonify(error="bad signature"), 400
-    prefs = pickle.loads(blob)
+    prefs = json.loads(blob.decode())
     return jsonify(prefs=prefs)
